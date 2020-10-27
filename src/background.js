@@ -1,27 +1,49 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import {
+  app,
+  protocol,
+  BrowserWindow
+} from 'electron'
 import {
   createProtocol,
   installVueDevtools
 } from 'vue-cli-plugin-electron-builder/lib'
+import path from 'path'
 const isDevelopment = process.env.NODE_ENV !== 'production'
+
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win
 
 // Standard scheme must be registered before the app is ready
-protocol.registerStandardSchemes(['app'], { secure: true })
-function createWindow () {
+protocol.registerStandardSchemes(['app'], {
+  secure: true
+})
+
+function createWindow() {
   // Create the browser window.
-  win = new BrowserWindow({ width: 1200, height: 750, titleBarStyle: 'hiddenInset' })
-  win.setOpacity(0.98)
+  win = new BrowserWindow({
+    width: 1200,
+    height: 750,
+    titleBarStyle: 'hiddenInset',
+    backgroundColor: '#2C3A47',
+    // eslint-disable-next-line no-undef
+    icon: path.join(__static, 'ProTiming6.png'),
+    webPreferences: {
+      // Use pluginOptions.nodeIntegration, leave this alone
+      // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
+      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION
+    }
+  })
+  win.setOpacity(0.95)
+  win.setMenuBarVisibility(false)
 
   if (isDevelopment) {
     // Load the url of the dev server if in development mode
     win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
-    // if (!process.env.IS_TEST) win.webContents.openDevTools()
+    if (!process.env.IS_TEST) win.webContents.openDevTools()
   } else {
     createProtocol('app')
     // Load the index.html when not in development
@@ -31,6 +53,10 @@ function createWindow () {
   win.on('closed', () => {
     win = null
   })
+  win.webContents.on('new-window', function(e, url) {
+    e.preventDefault();
+    require('electron').shell.openExternal(url);
+  });
 }
 
 // Quit when all windows are closed.
